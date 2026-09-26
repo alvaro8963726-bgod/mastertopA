@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@import 'tailwindcss';
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { display: none; }

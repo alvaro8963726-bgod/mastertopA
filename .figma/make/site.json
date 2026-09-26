@@ -1,0 +1,11 @@
+{
+  "title": "Master Top A",
+  "description": "This app offers a personalized simulated driving test experience for new drivers, providing tailored questions based on user data and state regulations.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
