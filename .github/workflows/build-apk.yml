@@ -1,9 +1,10 @@
+
 name: Build APK
 
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:   # permite rodar manualmente com um clique
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,10 +27,10 @@ jobs:
       - name: Instalar dependências
         run: pnpm install
 
-      - name: Build do app (Vite)
+      - name: Build do app
         run: pnpm run build
 
-      - name: Adicionar plataforma Android (Capacitor)
+      - name: Adicionar plataforma Android
         run: npx cap add android || true
 
       - name: Sincronizar Capacitor
@@ -43,9 +44,6 @@ jobs:
 
       - name: Permissão ao Gradle
         run: chmod +x android/gradlew
-
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v5
 
       - name: Build APK debug
         working-directory: android
