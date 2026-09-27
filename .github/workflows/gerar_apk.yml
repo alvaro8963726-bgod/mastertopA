@@ -1,0 +1,84 @@
+name: Descompactar e Gerar APK
+
+on:
+  push:
+    paths:
+      - '*.zip' # O robô começa a trabalhar assim que você envia um arquivo .zip
+
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Clonar Repositório
+        uses: actions/checkout@v4
+
+      - name: 2. Limpar estruturas antigas
+        run: |
+          rm -rf codigo_app
+          mkdir -p codigo_app
+
+      - name: 3. Descompactar o arquivo ZIP do Figma
+        run: |
+          unzip -o \*.zip -d ./codigo_app
+          # Move os arquivos para a raiz se vieram dentro de uma pasta interna no ZIP
+          if [ -d "./codigo_app/src" ] || [ -f "./codigo_app/package.json" ]; then
+            echo "Estrutura correta na pasta codigo_app"
+          else
+            mv ./codigo_app/*/* ./codigo_app/ 2>/dev/null || true
+          fi
+
+      - name: 4. Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 5. Instalar o gerenciador pnpm (usado no projeto)
+        run: npm install -g pnpm
+
+      - name: 6. Configurar o Java (Necessário para o Android)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 7. Instalar as Dependências do App
+        run: |
+          cd codigo_app
+          pnpm install --no-frozen-lockfile
+
+      - name: 8. Compilar o Projeto Web (Vite)
+        run: |
+          cd codigo_app
+          pnpm run build
+
+      - name: 9. Sincronizar Código com o Capacitor Android
+        run: |
+          cd codigo_app
+          # Garante que a pasta nativa android exista, se não, adiciona
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: 10. Compilar o APK Final (Gradle)
+        run: |
+          cd codigo_app/android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: 11. Salvar os arquivos extraídos de volta no Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          git add ./codigo_app
+          git commit -m "Automático: Código descompactado e atualizado" || echo "Sem alterações de código"
+          git push
+
+      - name: 12. Disponibilizar o APK para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: App-MasterTopA-Debug-APK
+          path: codigo_app/android/app/build/outputs/apk/debug/app-debug.apk
