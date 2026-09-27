@@ -1,0 +1,34 @@
+name: Descompactar ZIP Automaticamente
+
+on:
+  push:
+    paths:
+      - '*.zip' # Executa sempre que um arquivo .zip for enviado ou modificado
+
+permissions:
+  contents: write # Permissão obrigatória para o GitHub salvar os arquivos de volta
+
+jobs:
+  unzip-process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v4
+
+      - name: Extrair o arquivo ZIP
+        run: |
+          # Cria uma pasta chamada 'codigo_app' e extrai o ZIP lá dentro
+          mkdir -p codigo_app
+          unzip -o \*.zip -d ./codigo_app
+          
+      - name: Salvar arquivos extraídos no repositório
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          
+          # Adiciona a pasta extraída ao controle do Git
+          git add ./codigo_app
+          
+          # Confirma as alterações apenas se houver arquivos novos
+          git commit -m "Automático: Arquivos do Figma descompactados" || echo "Nenhuma mudança detectada"
+          git push
